@@ -5,7 +5,7 @@
         public static ServiceProvider Injections()
         {
             return new ServiceCollection()
-                 .AddSingleton<IServiceCourse, ServiceCourse>()
+                 .AddSingleton<IServiceAlura, ServiceAlura>()
                  .AddSingleton<IMongoClient, MongoClient>()
                  .BuildServiceProvider();
         }

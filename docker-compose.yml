@@ -3,9 +3,6 @@ services:
     mongodb:
         container_name: mongodb_scraping
         image: mongo:latest
-        # environment:
-        #     - MONGO_INITDB_ROOT_USERNAME=root
-        #     - MONGO_INITDB_ROOT_PASSWORD=123
         ports:
           - 27017:27017
         volumes:

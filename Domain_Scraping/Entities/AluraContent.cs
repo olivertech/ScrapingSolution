@@ -1,6 +1,6 @@
 ﻿namespace Domain_Scraping.Entities
 {
-    public class Course : BaseEntity
+    public class AluraContent : BaseEntity
     {
         public string Title { get; set; } = null!;
         public string Description { get; set; } = null!;

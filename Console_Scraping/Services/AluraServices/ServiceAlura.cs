@@ -1,8 +1,7 @@
 ﻿namespace Console_Scraping.Services.AluraServices
 {
-    public static class CoursesService
+    public static class ServiceAlura
     {
-        private static List<string> listLinkCourses = new List<string>();
         private static ServiceProvider _serviceProvider = null!;
 
         /// <summary>
@@ -19,7 +18,7 @@
 
             try
             {
-                var serviceProvider = _serviceProvider.GetService<IServiceCourse>()!;
+                var serviceProvider = _serviceProvider.GetService<IServiceAlura>()!;
 
 #if DEBUG
                 args = new string[1];
@@ -39,7 +38,7 @@
                 driver.Manage().Window.Maximize();
 
                 // Localizando o campo de pesquisa pelo nome 'query' no site Alura,
-                // e realizando a pesquisa pelo termo "ia"
+                // e realizando a pesquisa pelo termo usado na pesquisa
                 IWebElement element = driver.FindElement(By.Name("query"));
                 element.Clear();
                 element.SendKeys(args[0]);
@@ -68,35 +67,35 @@
                 if (clearAll)
                 {
                     //Remove todos os registros já carregados previamente
-                    DeleteAllCoursesDocuments(serviceProvider!);
+                    DeleteAllContentsDocuments(serviceProvider!);
 
                     //Percorro cada um dos botões de paginação, clicando um a um
                     for (int i = 1; i <= totalPages; i++)
                     {
-                        //Recupero os 25 cursos presentes na tela
-                        GetCourses(driver, serviceProvider);
+                        //Recupero os 25 conteúdos presentes na tela
+                        GetContents(driver, serviceProvider);
 
                         //Monta a pagina a ser buscada
                         parts[1] = parts[1].Replace((i).ToString(), "");
 
-                        //Monto o link da próxima paágina de cursos
+                        //Monto o link da próxima paágina de conteúdos
                         var buildedLink = parts[0] + "?" + parts[1] + (i + 1).ToString() + "&" + parts[2];
 
-                        //Navego pra nova página de cursos
+                        //Navego pra nova página de conteúdo
                         driver.Navigate().GoToUrl(buildedLink);
 
                         PrintCount(serviceProvider);
                     }
                 }
 
-                var courses = serviceProvider.GetAllAsync();
+                var contents = serviceProvider.GetAllAsync();
 
-                //Percorre todos os cursos gravados no banco,
+                //Percorre todos os conteúdos gravados no banco,
                 //acessando cada um e recuperando a carga horária
                 //e o nome do professor
-                foreach (var course in courses)
+                foreach (var content in contents)
                 {
-                    driver.Navigate().GoToUrl(course.Link);
+                    driver.Navigate().GoToUrl(content.Link);
 
                     IWebElement cargaHoraria = null!;
                     IReadOnlyList<IWebElement> professores = null!;
@@ -104,7 +103,7 @@
                     try
                     {
                         cargaHoraria = driver.FindElement(By.ClassName("formacao__info-destaque"));
-                        course.Duration = cargaHoraria.Text;
+                        content.Duration = cargaHoraria.Text;
                     }
                     catch (Exception)
                     {
@@ -114,7 +113,7 @@
                     try
                     {
                         cargaHoraria = driver.FindElement(By.ClassName("courseInfo-card-wrapper-infos"));
-                        course.Duration = cargaHoraria.Text;
+                        content.Duration = cargaHoraria.Text;
                     }
                     catch (Exception)
                     {
@@ -134,7 +133,7 @@
                                 if (!string.IsNullOrEmpty(professores[i].Text))
                                     nomes += professores[i].Text + "|";
                             }
-                            course.Professores = nomes[..^1];
+                            content.Professores = nomes[..^1];
                         }
                     }
                     catch (Exception)
@@ -154,7 +153,7 @@
                                 if (!string.IsNullOrEmpty(professores[i].Text))
                                     nomes += professores[i].Text + "|";
                             }
-                            course.Professores = nomes[..^1];
+                            content.Professores = nomes[..^1];
                         }
                     }
                     catch (Exception)
@@ -162,7 +161,7 @@
                         Console.WriteLine("Link sem a tag 'instructor-title--name'");
                     }
 
-                    serviceProvider.UpdateAsync(course);
+                    serviceProvider.UpdateAsync(content);
                 }
             }
             catch (Exception ex)
@@ -171,52 +170,56 @@
             }
             finally
             {
+                Console.WriteLine("============================================================================================");
+                Console.WriteLine("Scraping concluído com sucesso! Pressione qualquer tecla para fechar essa janela...");
+                Console.WriteLine("============================================================================================");
+                Console.ReadKey();
                 // Close the browser
                 driver.Quit();
             }
         }
 
         /// <summary>
-        /// Método que varre a tela e recupera todos os cursos listados,
+        /// Método que varre a tela e recupera todos os conteúdos listados,
         /// armazenando os dados iniciais de cada um
         /// </summary>
         /// <param name="driver"></param>
         /// <param name="serviceProvider"></param>
-        private static void GetCourses(IWebDriver driver, IServiceCourse serviceProvider)
+        private static void GetContents(IWebDriver driver, IServiceAlura serviceProvider)
         {
             IReadOnlyList<IWebElement> titles = driver.FindElements(By.ClassName("busca-resultado-nome"));
             IReadOnlyList<IWebElement> descriptions = driver.FindElements(By.ClassName("busca-resultado-descricao"));
             IReadOnlyList<IWebElement> link = driver.FindElements(By.ClassName("busca-resultado-link"));
 
-            //Recupera todos os links dos cursos de IA
+            //Recupera todos os links dos conteúdos
             for (int i = 0; i < titles.Count; i++)
             {
-                var newCourse = new Course
+                var newContent = new AluraContent
                 {
                     Title = titles[i].Text,
                     Description = descriptions[i].Text,
                     Link = link[i].GetAttribute("href")
                 };
 
-                serviceProvider.AddAsync(newCourse);
+                serviceProvider.AddAsync(newContent);
             }
         }
 
         /// <summary>
-        /// Método que recupera o total parcial de cursos recuperados
+        /// Método que recupera o total parcial de conteúdos recuperados
         /// </summary>
         /// <param name="serviceProvider"></param>
-        private async static void PrintCount(IServiceCourse serviceProvider)
+        private async static void PrintCount(IServiceAlura serviceProvider)
         {
             long total = await serviceProvider.GetCountAsync();
             Console.WriteLine($"Total parcial de documentos : {total}"); ;
         }
 
         /// <summary>
-        /// Método que apaga todos os cursos previamente gravados no banco
+        /// Método que apaga todos os conteúdos previamente gravados no banco
         /// </summary>
         /// <param name="serviceProvider"></param>
-        private async static void DeleteAllCoursesDocuments(IServiceCourse serviceProvider)
+        private async static void DeleteAllContentsDocuments(IServiceAlura serviceProvider)
         {
             var filter = new BsonDocument();
             var result = await serviceProvider.DeleteAllAsync();
