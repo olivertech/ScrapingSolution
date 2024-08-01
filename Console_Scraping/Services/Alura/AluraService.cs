@@ -90,81 +90,8 @@
                     }
                 }
 
-                var contents = serviceProvider.GetAllAsync();
-
-                //Percorre todos os conteúdos gravados no banco,
-                //acessando cada um e recuperando a carga horária
-                //e o nome do professor
-                foreach (var content in contents)
-                {
-                    driver.Navigate().GoToUrl(content.Link);
-
-                    IWebElement cargaHoraria = null!;
-                    IReadOnlyList<IWebElement> professores = null!;
-
-                    try
-                    {
-                        cargaHoraria = driver.FindElement(By.ClassName("formacao__info-destaque"));
-                        content.Duration = cargaHoraria.Text;
-                    }
-                    catch (Exception)
-                    {
-                        Console.WriteLine("Link sem a tag 'formacao__info-destaque'");
-                    }
-
-                    try
-                    {
-                        cargaHoraria = driver.FindElement(By.ClassName("courseInfo-card-wrapper-infos"));
-                        content.Duration = cargaHoraria.Text;
-                    }
-                    catch (Exception)
-                    {
-                        Console.WriteLine("Link sem a tag 'courseInfo-card-wrapper-infos'");
-                    }
-
-                    try
-                    {
-                        professores = driver.FindElements(By.ClassName("formacao-instrutor-nome"));
-
-                        if (professores.Count() > 0)
-                        {
-
-                            string nomes = null!;
-                            for (int i = 0; i < professores.Count; i++)
-                            {
-                                if (!string.IsNullOrEmpty(professores[i].Text))
-                                    nomes += professores[i].Text + "|";
-                            }
-                            content.Professores = nomes[..^1];
-                        }
-                    }
-                    catch (Exception)
-                    {
-                        Console.WriteLine("Link sem a tag 'formacao-instrutor-nome'");
-                    }
-
-                    try
-                    {
-                        professores = driver.FindElements(By.ClassName("instructor-title--name"));
-
-                        if (professores.Count() > 0)
-                        {
-                            string nomes = null!;
-                            for (int i = 0; i < professores.Count; i++)
-                            {
-                                if (!string.IsNullOrEmpty(professores[i].Text))
-                                    nomes += professores[i].Text + "|";
-                            }
-                            content.Professores = nomes[..^1];
-                        }
-                    }
-                    catch (Exception)
-                    {
-                        Console.WriteLine("Link sem a tag 'instructor-title--name'");
-                    }
-
-                    serviceProvider.UpdateAsync(content);
-                }
+                //Recupero os demais conteúdos
+                GetMoreContents(driver, serviceProvider);
             }
             catch (Exception ex)
             {
@@ -204,6 +131,88 @@
                 };
 
                 serviceProvider.AddAsync(newContent);
+            }
+        }
+
+        /// <summary>
+        /// Método que faz a busca dentro de cada conteúdo, pra
+        /// recuperar o nome dos professores e a carga horária
+        /// </summary>
+        /// <param name="driver"></param>
+        /// <param name="serviceProvider"></param>
+        private static void GetMoreContents(IWebDriver driver, IServiceAlura serviceProvider)
+        {
+            var contents = serviceProvider.GetAllAsync();
+
+            foreach (var content in contents)
+            {
+                driver.Navigate().GoToUrl(content.Link);
+
+                IWebElement cargaHoraria = null!;
+                IReadOnlyList<IWebElement> professores = null!;
+
+                try
+                {
+                    cargaHoraria = driver.FindElement(By.ClassName("formacao__info-destaque"));
+                    content.Duration = cargaHoraria.Text;
+                }
+                catch (Exception)
+                {
+                    Console.WriteLine("Link sem a tag 'formacao__info-destaque'");
+                }
+
+                try
+                {
+                    cargaHoraria = driver.FindElement(By.ClassName("courseInfo-card-wrapper-infos"));
+                    content.Duration = cargaHoraria.Text;
+                }
+                catch (Exception)
+                {
+                    Console.WriteLine("Link sem a tag 'courseInfo-card-wrapper-infos'");
+                }
+
+                try
+                {
+                    professores = driver.FindElements(By.ClassName("formacao-instrutor-nome"));
+
+                    if (professores.Count() > 0)
+                    {
+
+                        string nomes = null!;
+                        for (int i = 0; i < professores.Count; i++)
+                        {
+                            if (!string.IsNullOrEmpty(professores[i].Text))
+                                nomes += professores[i].Text + "|";
+                        }
+                        content.Professores = nomes[..^1];
+                    }
+                }
+                catch (Exception)
+                {
+                    Console.WriteLine("Link sem a tag 'formacao-instrutor-nome'");
+                }
+
+                try
+                {
+                    professores = driver.FindElements(By.ClassName("instructor-title--name"));
+
+                    if (professores.Count() > 0)
+                    {
+                        string nomes = null!;
+                        for (int i = 0; i < professores.Count; i++)
+                        {
+                            if (!string.IsNullOrEmpty(professores[i].Text))
+                                nomes += professores[i].Text + "|";
+                        }
+                        content.Professores = nomes[..^1];
+                    }
+                }
+                catch (Exception)
+                {
+                    Console.WriteLine("Link sem a tag 'instructor-title--name'");
+                }
+
+                serviceProvider.UpdateAsync(content);
             }
         }
 
