@@ -1,0 +1,9 @@
+﻿global using Common_Scraping.Dependencies;
+global using Domain_Scraping.Entities;
+global using Domain_Scraping.Services;
+global using Microsoft.Extensions.DependencyInjection;
+global using MongoDB.Bson;
+global using OpenQA.Selenium;
+global using OpenQA.Selenium.Chrome;
+global using System.Configuration;
+global using Console_Scraping.Services.AluraServices;
