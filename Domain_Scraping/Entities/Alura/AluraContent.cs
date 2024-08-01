@@ -1,4 +1,4 @@
-﻿namespace Domain_Scraping.Entities
+﻿namespace Domain_Scraping.Entities.Alura
 {
     public class AluraContent : BaseEntity
     {

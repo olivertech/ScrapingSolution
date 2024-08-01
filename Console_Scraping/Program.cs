@@ -7,7 +7,7 @@
             Console.WriteLine("=================================================");
             Console.WriteLine("Iniciando serviço de busca dos cursos Alura...");
             Console.WriteLine("=================================================");
-            ServiceAlura.Execute(args);
+            AluraService.Execute(args);
             Console.WriteLine("=================================================");
             Console.WriteLine("Finalizado serviço de busca dos cursos Alura...");
             Console.WriteLine("=================================================");

@@ -1,6 +1,6 @@
-﻿namespace Console_Scraping.Services.AluraServices
+﻿namespace Console_Scraping.Services.Alura
 {
-    public static class ServiceAlura
+    public static class AluraService
     {
         private static ServiceProvider _serviceProvider = null!;
 
@@ -22,7 +22,7 @@
 
 #if DEBUG
                 args = new string[1];
-                args[0] = "aspnet";
+                args[0] = "IA";
 #endif
                 if (args[0] is null || args.Length != 1)
                 {
@@ -76,13 +76,15 @@
                         GetContents(driver, serviceProvider);
 
                         //Monta a pagina a ser buscada
-                        parts[1] = parts[1].Replace((i).ToString(), "");
+                        parts[1] = parts[1].Replace(i.ToString(), "");
 
                         //Monto o link da próxima paágina de conteúdos
                         var buildedLink = parts[0] + "?" + parts[1] + (i + 1).ToString() + "&" + parts[2];
 
                         //Navego pra nova página de conteúdo
                         driver.Navigate().GoToUrl(buildedLink);
+
+                        driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromMilliseconds(500);
 
                         PrintCount(serviceProvider);
                     }

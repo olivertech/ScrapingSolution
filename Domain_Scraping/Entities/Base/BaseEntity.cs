@@ -1,7 +1,4 @@
-﻿using MongoDB.Bson.Serialization.Attributes;
-using MongoDB.Bson;
-
-namespace Domain_Scraping.Entities.Base
+﻿namespace Domain_Scraping.Entities.Base
 {
     public class BaseEntity
     {

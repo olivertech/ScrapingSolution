@@ -14,7 +14,7 @@
 
             _client = new MongoClient(settings);
             _database = client!.GetDatabase(ConfigurationManager.AppSettings["DatabaseName"]);
-            _collection = _database.GetCollection<T>(ConfigurationManager.AppSettings["CourseCollectionName"]);
+            _collection = _database.GetCollection<T>(ConfigurationManager.AppSettings["ContentCollectionName"]);
         }
 
         public async Task<long> GetCountAsync()
